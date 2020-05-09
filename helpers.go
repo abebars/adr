@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -33,20 +32,20 @@ type AdrStatus string
 
 // ADR status enums
 const (
-	PROPOSED   AdrStatus = "Proposed"
-	ACCEPTED   AdrStatus = "Accepted"
-	DEPRECATED AdrStatus = "Deprecated"
-	SUPERSEDED AdrStatus = "Superseded"
+	Pending  AdrStatus = "Pending"
+	Accepted AdrStatus = "Accepted"
+	Replaced AdrStatus = "Replaced"
 )
 
-var usr, err = user.Current()
+//TODO: this should be configurable allowing to specify the path on initiation
+var currentDir, _ = os.Getwd()
 var adrConfigFolderName = ".adr"
 var adrConfigFileName = "config.json"
 var adrConfigTemplateName = "template.md"
-var adrConfigFolderPath = filepath.Join(usr.HomeDir, adrConfigFolderName)
+var adrConfigFolderPath = filepath.Join(currentDir, adrConfigFolderName)
 var adrConfigFilePath = filepath.Join(adrConfigFolderPath, adrConfigFileName)
 var adrTemplateFilePath = filepath.Join(adrConfigFolderPath, adrConfigTemplateName)
-var adrDefaultBaseFolder = filepath.Join(usr.HomeDir, "adr")
+var adrDefaultBaseFolder = filepath.Join(currentDir, "adr")
 
 func initBaseDir(baseDir string) {
 	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
@@ -71,21 +70,17 @@ func initConfig(baseDir string) {
 func initTemplate() {
 	body := []byte(`
 # {{.Number}}. {{.Title}}
-======
+
 Date: {{.Date}}
 
 ## Status
-======
 {{.Status}}
 
 ## Context
-======
 
 ## Decision
-======
 
 ## Consequences
-======
 
 `)
 
@@ -117,9 +112,9 @@ func getConfig() AdrConfig {
 func newAdr(config AdrConfig, adrName []string) {
 	adr := Adr{
 		Title:  strings.Join(adrName, " "),
-		Date:   time.Now().Format("02-01-2006 15:04:05"),
+		Date:   time.Now().Format("02-01-2006"),
 		Number: config.CurrentAdr,
-		Status: PROPOSED,
+		Status: Pending,
 	}
 	template, err := template.ParseFiles(adrTemplateFilePath)
 	if err != nil {
