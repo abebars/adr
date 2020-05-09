@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/abebars/adr.svg?branch=master)](https://travis-ci.com/marouni/adr)
+[![Build Status](https://travis-ci.com/abebars/adr.svg?branch=master)](https://travis-ci.com/abebars/adr)
 
 # ADR Go 
 [Forked Version](https://github.com/marouni/adr)
