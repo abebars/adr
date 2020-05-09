@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -69,7 +69,7 @@ func initConfig(baseDir string) {
 
 func initTemplate() {
 	body := []byte(`
-# {{.Number}}. {{.Title}}
+# {{.Number | printf "%04d" }}. {{.Title}}
 
 Date: {{.Date}}
 
@@ -112,7 +112,7 @@ func getConfig() AdrConfig {
 func newAdr(config AdrConfig, adrName []string) {
 	adr := Adr{
 		Title:  strings.Join(adrName, " "),
-		Date:   time.Now().Format("02-01-2006"),
+		Date:   time.Now().Format("01-02-2006"),
 		Number: config.CurrentAdr,
 		Status: Pending,
 	}
@@ -120,7 +120,8 @@ func newAdr(config AdrConfig, adrName []string) {
 	if err != nil {
 		panic(err)
 	}
-	adrFileName := strconv.Itoa(adr.Number) + "-" + strings.Join(strings.Split(strings.Trim(adr.Title, "\n \t"), " "), "-") + ".md"
+	decisionName := strings.Join(strings.Split(strings.Trim(adr.Title, "\n \t"), " "), "-")
+	adrFileName := fmt.Sprintf("%04d-%s.md", adr.Number, decisionName)
 	adrFullPath := filepath.Join(config.BaseDir, adrFileName)
 	f, err := os.Create(adrFullPath)
 	if err != nil {
@@ -128,5 +129,5 @@ func newAdr(config AdrConfig, adrName []string) {
 	}
 	template.Execute(f, adr)
 	f.Close()
-	color.Green("ADR number " + strconv.Itoa(adr.Number) + " was successfully written to : " + adrFullPath)
+	color.Green("ADR number " + fmt.Sprintf("%04d", adr.Number) + " was successfully written to : " + adrFullPath)
 }
